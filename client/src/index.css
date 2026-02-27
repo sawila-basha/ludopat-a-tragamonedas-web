@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-security-950: #020617;
+  --color-security-900: #0f172a;
+  --color-security-800: #1e293b;
+  --color-security-700: #334155;
+  --color-security-600: #475569;
+  --color-security-500: #64748b;
+  --color-security-400: #94a3b8;
+  --color-security-300: #cbd5e1;
+  --color-security-200: #e2e8f0;
+  --color-security-100: #f1f5f9;
+  --color-security-50: #f8fafc;
+
+  --color-security-primary: #3b82f6;
+  --color-security-accent: #0ea5e9;
+  --color-security-success: #10b981;
+  --color-security-warning: #f59e0b;
+  --color-security-danger: #ef4444;
+
+  --animate-scan: scan 2s linear infinite;
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-bounce-in: bounce-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  --animate-shake: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  --animate-fade-in-down: fade-in-down 0.5s ease-out both;
+
+  @keyframes scan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+  
+  @keyframes bounce-in {
+    0% { opacity: 0; transform: scale(0.3); }
+    50% { opacity: 1; transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
+
+  @keyframes fade-in-down {
+    0% { opacity: 0; transform: translateY(-20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* Custom Utilities */
+@utility bg-grid-pattern {
+  background-image: linear-gradient(to right, #1e293b 1px, transparent 1px), linear-gradient(to bottom, #1e293b 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+body {
+  background-color: var(--color-security-950);
+  color: #f1f5f9;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}

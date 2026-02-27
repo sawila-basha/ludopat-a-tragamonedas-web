@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+  role     String @default("ADMIN")
+  createdAt DateTime @default(now())
+}
+
+model Ludopata {
+  id               Int      @id @default(autoincrement())
+  numRegistro      String?
+  personaInscrita  String
+  documento        String   @unique // DNI or CE
+  contacto         String?
+  ubigeo           String?
+  foto             String?
+  fechaPublicacion String?
+  createdAt        DateTime @default(now())
+}
+
+model SystemLog {
+  id            Int      @id @default(autoincrement())
+  lastPdfUpload DateTime @default(now())
+  pdfPath       String
+  recordCount   Int
+}
