@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
-import { FaUpload, FaFilePdf, FaSignOutAlt, FaSearch, FaDownload, FaDatabase, FaShieldAlt, FaDice, FaDesktop, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaUpload, FaSignOutAlt, FaSearch, FaDownload, FaDatabase, FaShieldAlt, FaDice, FaDesktop, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 interface LudopataRecord {
   id: number;
