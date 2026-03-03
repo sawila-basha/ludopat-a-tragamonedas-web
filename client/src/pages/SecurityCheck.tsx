@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import api from '../api';
-import { FaCheckCircle, FaTimesCircle, FaIdCard, FaKeyboard, FaShieldAlt, FaUserShield } from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle, FaIdCard, FaKeyboard, FaShieldAlt, FaUserShield, FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
 import PublicNavbar from '../components/PublicNavbar';
 
 interface LudopataData {
@@ -16,6 +16,8 @@ const SecurityCheck = () => {
   const [dni, setDni] = useState('');
   const [result, setResult] = useState<'idle' | 'allowed' | 'denied'>('idle');
   const [data, setData] = useState<LudopataData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto-focus input always
@@ -32,7 +34,11 @@ const SecurityCheck = () => {
       return;
     }
 
+    setLoading(true);
+    setError('');
+    
     try {
+      console.log('Searching:', searchDni);
       const response = await api.get(`/security/verify/${searchDni}`);
       if (response.data.found) {
         setResult('denied');
@@ -41,13 +47,23 @@ const SecurityCheck = () => {
         setResult('allowed');
         setData(null);
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err: any) {
+      console.error(err);
+      if (err.response) {
+        setError(`Error del servidor: ${err.response.status}`);
+      } else if (err.request) {
+        setError('Sin conexión con el servidor. Verifique su red.');
+      } else {
+        setError('Error al procesar la solicitud.');
+      }
+      setResult('idle');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !loading) {
       handleSearch(dni);
       inputRef.current?.select();
     }
@@ -55,8 +71,9 @@ const SecurityCheck = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDni(e.target.value);
-    if (result !== 'idle') {
+    if (result !== 'idle' || error) {
       setResult('idle');
+      setError('');
     }
   };
 
@@ -104,11 +121,18 @@ const SecurityCheck = () => {
                 autoComplete="off"
               />
               <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden md:block animate-pulse-slow">
-                <FaKeyboard className="text-security-600 text-2xl" />
+                {loading ? <FaSpinner className="animate-spin text-security-primary text-2xl" /> : <FaKeyboard className="text-security-600 text-2xl" />}
               </div>
             </div>
             
-            {result === 'idle' && (
+            {error && (
+              <div className="mt-4 bg-security-danger/20 border border-security-danger/50 text-security-danger px-4 py-3 rounded-xl flex items-center justify-center gap-2 animate-shake">
+                <FaExclamationTriangle />
+                <span className="font-bold">{error}</span>
+              </div>
+            )}
+            
+            {result === 'idle' && !error && (
               <div className="text-center mt-6 space-y-2 px-4">
                 <p className="text-security-primary font-medium tracking-widest text-xs md:text-sm uppercase flex items-center justify-center gap-2">
                   <span className="w-2 h-2 bg-security-success rounded-full animate-pulse"></span>

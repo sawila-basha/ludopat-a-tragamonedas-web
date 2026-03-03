@@ -16,6 +16,7 @@ const Login = () => {
     setError('');
     
     try {
+      console.log('API URL:', api.defaults.baseURL);
       const response = await api.post('/auth/login', {
         email,
         password,
@@ -23,8 +24,19 @@ const Login = () => {
 
       localStorage.setItem('token', response.data.token);
       navigate('/admin');
-    } catch (err) {
-      setError('Credenciales de acceso inválidas');
+    } catch (err: any) {
+      console.error('Login Error:', err);
+      if (err.response) {
+        if (err.response.status === 401) {
+          setError('Credenciales de acceso inválidas');
+        } else {
+          setError(`Error del servidor: ${err.response.status} - ${err.response.data?.error || ''}`);
+        }
+      } else if (err.request) {
+        setError('No hay conexión con el servidor. Verifique que el backend esté activo.');
+      } else {
+        setError('Error al intentar iniciar sesión');
+      }
     } finally {
       setLoading(false);
     }
