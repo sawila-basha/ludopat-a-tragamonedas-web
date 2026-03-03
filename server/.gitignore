@@ -6,5 +6,6 @@ uploads/
 *.xlsx
 *.xls
 dist/
+*.db
 
 /generated/prisma
