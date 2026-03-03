@@ -29,8 +29,12 @@ router.post('/login', async (req, res) => {
     });
 
     res.json({ token, user: { email: user.email, role: user.role } });
-  } catch (error) {
-    res.status(500).json({ error: 'Error en el servidor' });
+  } catch (error: any) {
+    console.error('Login Error:', error);
+    res.status(500).json({ 
+      error: 'Error en el servidor',
+      details: error.message 
+    });
   }
 });
 

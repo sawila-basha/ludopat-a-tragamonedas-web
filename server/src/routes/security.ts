@@ -20,8 +20,12 @@ router.get('/verify/:dni', async (req, res) => {
     } else {
       return res.json({ found: false });
     }
-  } catch (error) {
-    res.status(500).json({ error: 'Error al verificar DNI' });
+  } catch (error: any) {
+    console.error('Security Check Error:', error);
+    res.status(500).json({ 
+      error: 'Error al verificar DNI',
+      details: error.message 
+    });
   }
 });
 
