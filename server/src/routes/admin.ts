@@ -81,31 +81,31 @@ router.post('/upload', authenticateToken, upload.single('pdf'), async (req, res)
       return res.status(400).json({ error: 'No se encontraron registros en el archivo.' });
     }
 
+    // Deduplicate records by 'documento' to avoid unique constraint errors (PREPARE DATA BEFORE TRANSACTION)
+    const uniqueRecordsMap = new Map();
+    for (const record of records) {
+        if (record.documento && !uniqueRecordsMap.has(record.documento)) {
+            uniqueRecordsMap.set(record.documento, record);
+        }
+    }
+    const uniqueRecords = Array.from(uniqueRecordsMap.values());
+    console.log(`Original records: ${records.length}, Unique records: ${uniqueRecords.length}`);
+
     // Transaction: Delete all old, insert new, log upload
     await prisma.$transaction(async (tx) => {
       // 1. Delete old records
       await tx.ludopata.deleteMany({});
 
-      // 2. Insert new records
-      // Use Promise.all with create since createMany might not be available or causing type issues
-      if (records.length > 0) {
-        // Deduplicate records by 'documento' to avoid unique constraint errors
-        const uniqueRecordsMap = new Map();
-        for (const record of records) {
-            if (!uniqueRecordsMap.has(record.documento)) {
-                uniqueRecordsMap.set(record.documento, record);
-            }
-        }
-        const uniqueRecords = Array.from(uniqueRecordsMap.values());
-        
-        console.log(`Original records: ${records.length}, Unique records: ${uniqueRecords.length}`);
-
-        // Chunking to avoid too many parallel promises if records are huge
-        // But for simplicity:
-        for (const record of uniqueRecords) {
-           await tx.ludopata.create({
-             data: record
-           });
+      // 2. Insert new records using createMany for performance
+      if (uniqueRecords.length > 0) {
+        // Process in chunks of 1000 to avoid any potential limits (though createMany handles this well)
+        const BATCH_SIZE = 1000;
+        for (let i = 0; i < uniqueRecords.length; i += BATCH_SIZE) {
+          const batch = uniqueRecords.slice(i, i + BATCH_SIZE);
+          await tx.ludopata.createMany({
+            data: batch,
+            skipDuplicates: true
+          });
         }
       }
 
@@ -113,15 +113,18 @@ router.post('/upload', authenticateToken, upload.single('pdf'), async (req, res)
       await tx.systemLog.create({
         data: {
           pdfPath: req.file!.path,
-          recordCount: records.length,
+          recordCount: uniqueRecords.length,
           lastPdfUpload: new Date()
         }
       });
+    }, {
+      maxWait: 10000, // 10s
+      timeout: 60000  // 60s
     });
 
     res.json({ 
       message: 'Base de datos actualizada exitosamente', 
-      count: records.length,
+      count: uniqueRecords.length,
       timestamp: new Date()
     });
 
