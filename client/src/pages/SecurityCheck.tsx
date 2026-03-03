@@ -50,7 +50,9 @@ const SecurityCheck = () => {
     } catch (err: any) {
       console.error(err);
       if (err.response) {
-        setError(`Error del servidor: ${err.response.status}`);
+        // Show detailed error if available
+        const errorMessage = err.response.data?.details || err.response.data?.error || `Error del servidor: ${err.response.status}`;
+        setError(errorMessage);
       } else if (err.request) {
         setError('Sin conexión con el servidor. Verifique su red.');
       } else {

@@ -30,9 +30,11 @@ const Login = () => {
         if (err.response.status === 401) {
           setError('Credenciales de acceso inválidas');
         } else {
-          setError(`Error del servidor: ${err.response.status} - ${err.response.data?.error || ''}`);
-        }
-      } else if (err.request) {
+            // Show detailed error if available
+            const errorMessage = err.response.data?.details || err.response.data?.error || `Error del servidor: ${err.response.status}`;
+            setError(errorMessage);
+          }
+        } else if (err.request) {
         setError('No hay conexión con el servidor. Verifique que el backend esté activo.');
       } else {
         setError('Error al intentar iniciar sesión');
